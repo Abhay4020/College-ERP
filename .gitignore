@@ -3,7 +3,7 @@
 # dependencies
 node_modules
 .env
-.evnv.example
+.env.example
 .env.sample
 
 /.pnp
