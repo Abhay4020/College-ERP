@@ -1,7 +1,7 @@
 # 🎓 College ERP — Advanced College Management System
 
 [![MERN Stack](https://img.shields.io/badge/Stack-MERN-blue.svg?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/mern-stack)
-[![Cloudinary](https://img.shields.io/badge/Storage-Cloudinary-lightgrey.svg?style=for-the-badge&logo=cloudinary)](https://cloudinary.com)
+
 [![JWT Auth](https://img.shields.io/badge/Auth-JWT-orange.svg?style=for-the-badge&logo=jsonwebtokens)](https://jwt.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
@@ -9,16 +9,6 @@ A modern, highly secure, and feature-rich Enterprise Resource Planning (ERP) pla
 
 ---
 
-## 🌟 Live Demo Preview
-
-Experience the platform immediately! A pre-configured student preview account has been set up for visitors to explore the dashboards, check academic profiles, view exam schedules, and download course materials.
-
-> ### **Demo Credentials**
-> * 👤 **Role:** Student Viewer
-> * 📧 **Email:** `demo@gmail.com`
-> * 🔑 **Password:** `student123`
-
----
 
 ## 📅 Table of Contents
 
