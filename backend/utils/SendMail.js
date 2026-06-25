@@ -1,4 +1,3 @@
-
 // TODO: Re-integrate email sending (Nodemailer / Brevo) later when ready.
 
 const sendResetMail = async (email, resetToken, type) => {
