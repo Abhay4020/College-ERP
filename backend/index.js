@@ -1,3 +1,4 @@
+require("dotenv").config(); // ← MUST be first line so JWT_SECRET, PORT, etc. are available
 const connectToMongo = require("./Database/db");
 const express = require("express");
 const cors = require("cors");
