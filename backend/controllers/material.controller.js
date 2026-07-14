@@ -1,6 +1,6 @@
 const Material = require("../models/material.model");
 const ApiResponse = require("../utils/ApiResponse");
-// Cloudinary removed — files are stored locally in ./media
+const cloudinary = require("../utils/cloudinary");
 
 const getMaterialsController = async (req, res) => {
   try {
@@ -49,8 +49,8 @@ const addMaterialController = async (req, res) => {
       return ApiResponse.badRequest("Invalid material type").send(res);
     }
 
-    // Save file locally (served from /media)
-    const fileUrl = req.file.filename;
+    // Upload file to Cloudinary
+    const fileUrl = req.file.path; // Cloudinary secure_url
 
     const material = await Material.create({
       title,
@@ -111,8 +111,8 @@ const updateMaterialController = async (req, res) => {
     }
     
     if (req.file) {
-      // Save new file locally (served from /media)
-      updateData.file = req.file.filename;
+      // Upload new file to Cloudinary
+      updateData.file = req.file.path; // Cloudinary secure_url
     }
 
     const updatedMaterial = await Material.findByIdAndUpdate(id, updateData, {
@@ -152,7 +152,17 @@ const deleteMaterialController = async (req, res) => {
       ).send(res);
     }
 
-    // (Local files are not auto-deleted; clean up manually if needed)
+    // Delete file from Cloudinary
+    if (material.file) {
+      try {
+        const urlParts = material.file.split("/");
+        const fileWithExt = urlParts[urlParts.length - 1];
+        const publicId = `college-erp/materials/${fileWithExt.split(".")[0]}`;
+        await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
+      } catch (err) {
+        console.warn("Could not delete Cloudinary file:", err.message);
+      }
+    }
 
     await Material.findByIdAndDelete(id);
 

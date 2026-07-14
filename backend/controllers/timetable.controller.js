@@ -42,11 +42,8 @@ const addTimetableController = async (req, res) => {
 
     let timetable = await Timetable.findOne({ batch, branch });
 
-    // Upload timetable file to Cloudinary
-    const cloudinaryResponse = await uploadToCloudinary(req.file.path, "college_erp/timetables");
-    if (!cloudinaryResponse) {
-      return ApiResponse.internalServerError("Failed to upload timetable to cloud").send(res);
-    }
+    // File is already uploaded to Cloudinary via multer-storage-cloudinary
+    const fileUrl = req.file.path; // Cloudinary secure_url
 
     if (timetable) {
       // Delete old timetable file from Cloudinary (if any)
@@ -57,7 +54,7 @@ const addTimetableController = async (req, res) => {
         {
           batch,
           branch,
-          link: cloudinaryResponse.secure_url,
+          link: fileUrl,
         },
         { new: true },
       );
@@ -70,7 +67,7 @@ const addTimetableController = async (req, res) => {
     timetable = await Timetable.create({
       batch,
       branch,
-      link: cloudinaryResponse.secure_url,
+      link: fileUrl,
     });
 
     return ApiResponse.created(timetable, "Timetable added successfully").send(
@@ -98,12 +95,8 @@ const updateTimetableController = async (req, res) => {
 
     let newLink;
     if (req.file) {
-      // Upload new file to Cloudinary
-      const cloudinaryResponse = await uploadToCloudinary(req.file.path, "college_erp/timetables");
-      if (!cloudinaryResponse) {
-        return ApiResponse.internalServerError("Failed to upload timetable to cloud").send(res);
-      }
-      newLink = cloudinaryResponse.secure_url;
+      // File is already uploaded to Cloudinary via multer-storage-cloudinary
+      newLink = req.file.path; // Cloudinary secure_url
 
       // Delete old file from Cloudinary
       await deleteFromCloudinary(existingTimetable.link);

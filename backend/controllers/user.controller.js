@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ApiResponse = require("../utils/ApiResponse");
 const sendResetMail = require("../utils/SendMail");
+const cloudinary = require("../utils/cloudinary");
 
 // ═══════════════════════════════════════════════════════════════
 // AUTH CONTROLLERS
@@ -456,10 +457,10 @@ const registerController = async (req, res) => {
         "",
     };
 
-    // Save profile image locally (served from /media)
+    // Upload profile image to Cloudinary
     let profileUrl;
     if (req.file) {
-      profileUrl = req.file.filename;
+      profileUrl = req.file.path; // Cloudinary returns secure_url as req.file.path
     }
 
     // ─── Build user data ────────────────────────────────────
@@ -576,9 +577,23 @@ const updateDetailsController = async (req, res) => {
     delete updateData.rollNumber;
     delete updateData.employeeId;
 
-    // Save updated profile image locally (served from /media)
+    // Upload updated profile image to Cloudinary (delete old one first)
     if (req.file) {
-      updateData.profile = req.file.filename;
+      // Delete old profile from Cloudinary if it exists
+      const existingUser = await User.findById(id).select("profile");
+      if (existingUser && existingUser.profile) {
+        try {
+          // Extract public_id from the Cloudinary URL
+          const urlParts = existingUser.profile.split("/");
+          const fileWithExt = urlParts[urlParts.length - 1];
+          const folder = urlParts[urlParts.length - 2];
+          const publicId = `${folder}/${fileWithExt.split(".")[0]}`;
+          await cloudinary.uploader.destroy(`college-erp/profiles/${publicId.split("/").pop()}`);
+        } catch (err) {
+          console.warn("Could not delete old Cloudinary image:", err.message);
+        }
+      }
+      updateData.profile = req.file.path; // Cloudinary secure_url
     }
 
     // Handle emergency contact from FormData
@@ -643,7 +658,14 @@ const deleteDetailsController = async (req, res) => {
 
     // Delete profile image from Cloudinary
     if (user.profile) {
-      await deleteFromCloudinary(user.profile);
+      try {
+        const urlParts = user.profile.split("/");
+        const fileWithExt = urlParts[urlParts.length - 1];
+        const publicId = `college-erp/profiles/${fileWithExt.split(".")[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      } catch (err) {
+        console.warn("Could not delete Cloudinary image:", err.message);
+      }
     }
 
     await User.findByIdAndDelete(id);
